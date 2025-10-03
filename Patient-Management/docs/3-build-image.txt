@@ -1,0 +1,30 @@
+# ---------- build jar ----------
+FROM maven:3.9.9-eclipse-temurin-21 AS builder
+WORKDIR /app
+COPY pom.xml .
+RUN mvn -q -DskipTests dependency:go-offline
+COPY src ./src
+RUN mvn -q -Dmaven.test.skip=true clean package
+RUN cp target/*.jar app.jar
+
+# ---------- build minimal JRE with jlink ----------
+FROM eclipse-temurin:21-jdk AS jrebuilder
+WORKDIR /opt
+COPY --from=builder /app/app.jar /opt/app.jar
+# figure out required modules from the jar
+RUN jdeps --ignore-missing-deps --print-module-deps /opt/app.jar > /tmp/modules.txt
+# include crypto & charsets just in case
+RUN jlink \
+    --add-modules $(cat /tmp/modules.txt),jdk.crypto.ec,jdk.localedata \
+    --no-man-pages --no-header-files --strip-debug --compress=2 \
+    --output /opt/jre
+
+# ---------- run ----------
+FROM debian:bookworm-slim
+ENV JAVA_HOME=/opt/jre PATH="/opt/jre/bin:${PATH}"
+WORKDIR /app
+COPY --from=jrebuilder /opt/jre /opt/jre
+COPY --from=builder    /app/app.jar /app/app.jar
+EXPOSE 4000
+USER 1000:1000
+ENTRYPOINT ["java","-jar","/app/app.jar"]

@@ -1,0 +1,8 @@
+### Create a new Patient Entity
+POST http://localhost:4000/patients/create-patient-bill
+Content-Type: application/json
+
+{
+  "name": "Azozza5",
+  "email": "asder@gmail.com"
+}

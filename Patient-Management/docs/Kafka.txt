@@ -1,0 +1,31 @@
+Of course we know kafka that enables Asynchronous communication between the services
+
+-> First we must know that the default port of the kafka is 9092 , ok what about the port 9094 ???
+
+
+
+
+
+
+We need to know that the message that is sent to the kafka is key-value message
+-- Each topic in the kafka must have group(services that interested in that topic and consumes it)
+
+
+A topic in kafka is split into partitions
+
+
+
+
+Why the message value(not the key) is converted to bytes of array
+
+
+
+
+
+
+
+
+
+
+
+
