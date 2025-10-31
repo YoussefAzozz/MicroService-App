@@ -35,7 +35,6 @@ export function startGrpcServer() {
         return;
       }
       console.log(`gRPC server started, listening on port ${port}`);
-      server.start();
     }
   );
 }

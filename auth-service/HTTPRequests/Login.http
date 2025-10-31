@@ -1,0 +1,11 @@
+### POST request Login to Server
+POST http://localhost:4005/login
+Content-Type: application/json
+
+
+{
+  "email": "uioiuop@yahoo.com",
+  "password": "mancity1011"
+}
+
+###

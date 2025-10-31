@@ -1,0 +1,47 @@
+# --- Build output ---
+target/
+**/target/
+out/
+build/
+
+# --- Maven wrapper & metadata (not needed since you use maven: image) ---
+.mvn/
+mvnw
+mvnw.cmd
+
+# --- IDE files ---
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.project
+.classpath
+.settings/
+.factorypath
+
+# --- Logs & temp ---
+logs/
+*.log
+tmp/
+*.swp
+*.swo
+
+# --- VCS ---
+.git/
+.gitattributes
+.gitignore
+
+# --- OS cruft ---
+.DS_Store
+Thumbs.db
+
+# --- Docker/compose & env files (not needed inside image) ---
+docker-compose*.yml
+compose*.yml
+Dockerfile
+.env
+HTTPRequests
+# --- Optional: exclude tests to shrink context further ---
+# Only do this if you also skip compiling tests (use -Dmaven.test.skip=true)
+# src/test/

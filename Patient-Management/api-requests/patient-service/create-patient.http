@@ -1,10 +1,11 @@
 ### Create a new Patient Entity
-POST http://localhost:4004/api/patients
+POST http://localhost:4000/patients
 Content-Type: application/json
 
 {
   "name": "YoussefAzozz",
-  "email": "azozzasder@yahoo.com",
+  "email": "azozztamam@yahoo.com",
+  "password": "mancity",
   "address": "Giza Al Haramdas",
   "dateOfBirth": "2001-04-15",
   "registeredDate": "2025-08-28"

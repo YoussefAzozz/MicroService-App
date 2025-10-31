@@ -1,13 +1,17 @@
 package com.example.patientservice.service;
 
+import com.example.patientservice.dto.PatientAuth;
 import com.example.patientservice.dto.PatientRequestDTO;
 import com.example.patientservice.dto.PatientResponseDTO;
 import com.example.patientservice.exception.EmailAlreadyExists;
 import com.example.patientservice.exception.PatientNotFoundException;
+import com.example.patientservice.gRPC.BillingServiceGrpcClient;
 import com.example.patientservice.kafka.KafkaProducer;
 import com.example.patientservice.mapper.PatientMapper;
 import com.example.patientservice.model.Patient;
 import com.example.patientservice.repository.PatientRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -19,6 +23,9 @@ public class PatientService {
 
     private final PatientRepository patientRepository;
     private final KafkaProducer kafkaProducer;
+
+    private static final Logger log = LoggerFactory.getLogger(
+            PatientService.class);
 
 
     public PatientService(PatientRepository patientRepository , KafkaProducer kafkaProducer) {
@@ -39,8 +46,14 @@ public class PatientService {
             throw new EmailAlreadyExists("Email already exists "+ patientRequestDTO.getEmail());
         }
 
+        PatientAuth patientAuth = new  PatientAuth();
+        patientAuth.setEmail(patientRequestDTO.getEmail());
+        patientAuth.setPassword(patientRequestDTO.getPassword());
+        kafkaProducer.sendPatient(patientAuth);
+        log.info("✅ Sent to topic={} partition={} offset={}");
         Patient newPatient = patientRepository.save(PatientMapper.toModel(patientRequestDTO));
         kafkaProducer.sendEvent(newPatient);
+
 
         return PatientMapper.toDTO(newPatient);
     }

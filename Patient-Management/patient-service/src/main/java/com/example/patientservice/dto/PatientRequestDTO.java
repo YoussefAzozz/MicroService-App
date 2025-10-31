@@ -11,9 +11,22 @@ public class PatientRequestDTO {
     @Size(max = 100 , message = "Name cannot exceed 100 Characters")
     private String name;
 
+
+    @NotBlank(message = "Password is required")
+    private String password;
+
+
     @NotBlank(message = "Email is required")
     @Email(message = "Email should be valid")
     private String email;
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
     @NotBlank(message = "Address is required")
     @Size(max = 100 , message = "Address cannot not exceed 100 Characters")

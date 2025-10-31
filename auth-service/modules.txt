@@ -1,0 +1,13 @@
+jdk.localedata
+java.desktop
+jdk.unsupported
+java.naming
+java.sql
+java.management
+jdk.management
+java.rmi
+java.security.jgss
+java.security.sasl
+jdk.security.auth
+java.instrument
+java.xml

@@ -8,7 +8,7 @@ COPY . .
 RUN npm run build
 
 
-FROM node:18-alpine
+FROM node:18-alpine as production
 
 WORKDIR /app
 
@@ -19,15 +19,10 @@ RUN addgroup -S appgroup && adduser -S appuser -G appgroup &&  \
     # Change ownership of the working directory to the non-root user
     chown -R appuser:appgroup /app
 
-
-ENV connection="mongodb://root:azozzpass@mongo-db:27017/grpcdb?authSource=admin" \
-    PORT=5000 \
-    GRPC_PORT=9001
-
 # Switch to the non-root user
 USER appuser
 
-EXPOSE 5000 9001
+EXPOSE 9001
 
 ENTRYPOINT ["node"]
 
