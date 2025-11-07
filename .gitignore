@@ -3,6 +3,5 @@ postgres-data
 postgresql-auth-db
 Billing-Service/node_modules
 Billing-Service/config
-Billing-Service/docker-compose.yml
 init-scripts/
 *.sql
