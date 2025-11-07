@@ -1,0 +1,209 @@
+
+
+networks:
+  patient-network:
+
+volumes:
+  pg_data:
+  auth_pg_data:
+  mongo_data:
+  kafka_kraft:
+
+services:
+  patient-service-db:
+    image: postgres:latest
+    container_name: patient-service-db
+    env_file:
+      - ../Billing-Service/postgres.env
+      
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      # escape $ for in-container expansion
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB -h 127.0.0.1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+    networks: 
+      - patient-network
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"     # max 50% of one CPU core
+          memory: 512M     # max 512 MB RAM
+        reservations:
+          cpus: "0.25"     # reserved 25% CPU
+          memory: 256M     # reserved 256 MB RAM
+
+
+
+
+  auth-service-db:
+    image: postgres:latest
+    container_name: auth-service-db
+    env_file:
+      - ../Billing-Service/.env.auth-db
+    volumes:
+      - auth_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      # escape $ for in-container expansion
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB -h 127.0.0.1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+    networks: 
+      - patient-network
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"     # max 50% of one CPU core
+          memory: 512M     # max 512 MB RAM
+        reservations:
+          cpus: "0.25"     # reserved 25% CPU
+          memory: 256M     # reserved 256 MB RAM
+
+  mongo-db:
+    image: mongo:latest
+    container_name: mongo-db
+    env_file:
+      - ../Billing-Service/.env.mongo
+      # optional seed db name (used by init scripts if you add any)
+      # MONGO_INITDB_DATABASE: billing
+    volumes:
+      - mongo_data:/data/db
+      - ./mongo-init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "mongodb://localhost:27017/admin", "--eval", "db.adminCommand('ping').ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+    networks: 
+      - patient-network
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"     # max 50% of one CPU core
+          memory: 512M     # max 512 MB RAM
+        reservations:
+          cpus: "0.25"     # reserved 25% CPU
+          memory: 256M     # reserved 256 MB RAM
+
+  billing-service:
+    image: grpc-nodejs:1.0
+    container_name: billing-service
+    env_file:
+      - ../Billing-Service/config/.env
+    depends_on:
+      mongo-db:
+        condition: service_healthy
+      patient-service:
+        condition: service_started
+    networks: 
+      - patient-network
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"     # max 50% of one CPU core
+          memory: 512M     # max 512 MB RAM
+        reservations:
+          cpus: "0.25"     # reserved 25% CPU
+          memory: 256M     # reserved 256 MB RAM
+
+  patient-service:
+    image: patient-service:3.0
+    container_name: patient-service
+    env_file:
+      - ../Billing-Service/.env-patient-service   
+    depends_on:
+      patient-service-db:
+        condition: service_healthy
+    networks: 
+      - patient-network
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"     # max 50% of one CPU core
+          memory: 512M     # max 512 MB RAM
+        reservations:
+          cpus: "0.25"     # reserved 25% CPU
+          memory: 256M     # reserved 256 MB RAM
+
+
+  notification-service:
+    image: notification-service:1.0
+    container_name: notification-service
+    env_file:
+      - ../Billing-Service/.env.patient.service
+    networks: 
+      - patient-network
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"     # max 50% of one CPU core
+          memory: 512M     # max 512 MB RAM
+        reservations:
+          cpus: "0.25"     # reserved 25% CPU
+          memory: 256M     # reserved 256 MB RAM
+
+  auth-service:
+    image: auth-service:1.0
+    container_name: auth-service
+    env_file:
+      - ../Billing-Service/.env.auth.service
+      
+    networks: 
+      - patient-network
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"     # max 50% of one CPU core
+          memory: 512M     # max 512 MB RAM
+        reservations:
+          cpus: "0.25"     # reserved 25% CPU
+          memory: 256M     # reserved 256 MB RAM
+
+  kafka:
+    image: bitnami/kafka:latest
+    container_name: kafka
+    env_file:
+      - ../Billing-Service/.env.kafka
+
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics.sh --bootstrap-server kafka:9092 --list || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 15s
+    networks: 
+      - patient-network
+    volumes: 
+      - kafka_kraft:/var/lib/kafka/data
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"     # max 50% of one CPU core
+          memory: 512M     # max 512 MB RAM
+        reservations:
+          cpus: "0.25"     # reserved 25% CPU
+          memory: 256M     # reserved 256 MB RAM
+
+  api-gateway:
+    image: api-gateway:dev
+    container_name: api-gateway
+    ports:
+      - "4004:4004"
+    networks: 
+      - patient-network
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"     # max 50% of one CPU core
+          memory: 512M     # max 512 MB RAM
+        reservations:
+          cpus: "0.25"     # reserved 25% CPU
+          memory: 256M     # reserved 256 MB RAM
+
+
