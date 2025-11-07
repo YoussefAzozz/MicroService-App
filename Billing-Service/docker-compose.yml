@@ -5,6 +5,7 @@ networks:
 
 volumes:
   pg_data:
+  auth_pg_data:
   mongo_data:
   kafka_kraft:
 
@@ -12,12 +13,39 @@ services:
   patient-service-db:
     image: postgres:latest
     container_name: patient-service-db
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB:-patientdb}
-      POSTGRES_USER: ${POSTGRES_USER:-azozz}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-asder123}
+    env_file:
+      - postgres.env
+      
     volumes:
       - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      # escape $ for in-container expansion
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB -h 127.0.0.1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+    networks: 
+      - patient-network
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"     # max 50% of one CPU core
+          memory: 512M     # max 512 MB RAM
+        reservations:
+          cpus: "0.25"     # reserved 25% CPU
+          memory: 256M     # reserved 256 MB RAM
+
+
+
+
+  auth-service-db:
+    image: postgres:latest
+    container_name: auth-service-db
+    env_file:
+      - .env.auth-db
+    volumes:
+      - auth_pg_data:/var/lib/postgresql/data
     healthcheck:
       # escape $ for in-container expansion
       test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB -h 127.0.0.1"]
@@ -39,9 +67,8 @@ services:
   mongo-db:
     image: mongo:latest
     container_name: mongo-db
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER:-root}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-rootpass}
+    env_file:
+      - .env.mongo
       # optional seed db name (used by init scripts if you add any)
       # MONGO_INITDB_DATABASE: billing
     volumes:
@@ -88,21 +115,8 @@ services:
   patient-service:
     image: patient-service:3.0
     container_name: patient-service
-    environment:
-      # Spring → Postgres
-      SPRING_DATASOURCE_URL: jdbc:postgresql://patient-service-db:5432/${POSTGRES_DB:-patientdb}
-      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-azozz}
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-asder123}
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-      SPRING_JPA_HIBERNATE_DDL_AUTO: update
-      SPRING_SQL_INT_MODE: always
-      # Optional JPA tuning
-      # SPRING_JPA_HIBERNATE_DDL_AUTO: update
-      # Expose service on 4000 (relaxed binding for server.port)
-      SERVER_PORT: 4000
-      # Spring → Node gRPC
-      billing.service.address: billing-service
-      billing.service.grpc.port: 9001
+    env_file:
+      - .env-patient-service   
     depends_on:
       patient-service-db:
         condition: service_healthy
@@ -121,13 +135,25 @@ services:
   notification-service:
     image: notification-service:1.0
     container_name: notification-service
-    environment:
-      spring.mail.host: smtp.gmail.com
-      spring.mail.port: 587
-      spring.mail.username: yossefazozz40@gmail.com
-      spring.mail.password: "ltel wlrx qlvv kcko"
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-      SERVER_PORT: 7000
+    env_file:
+      - .env.patient.service
+    networks: 
+      - patient-network
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"     # max 50% of one CPU core
+          memory: 512M     # max 512 MB RAM
+        reservations:
+          cpus: "0.25"     # reserved 25% CPU
+          memory: 256M     # reserved 256 MB RAM
+
+  auth-service:
+    image: auth-service:1.0
+    container_name: auth-service
+    env_file:
+      - .env.auth.service
+      
     networks: 
       - patient-network
     deploy:
@@ -142,25 +168,8 @@ services:
   kafka:
     image: bitnami/kafka:latest
     container_name: kafka
-    environment:
-      # Basic roles and listeners
-      KAFKA_CFG_PROCESS_ROLES: controller,broker
-      KAFKA_CFG_NODE_ID: 0
-
-      # Define listener types
-      KAFKA_CFG_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
-      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
-      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
-      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
-      KAFKA_CFG_LOG_RETENTION_HOURS: 24
-      KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
-
-      # Internal cluster quorum
-      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 0@kafka:9093
-
-      # Disable Kraft auto-creation for clarity (optional)
-      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: "true"
-      ALLOW_PLAINTEXT_LISTENER: "yes"
+    env_file:
+      - .env.kafka
 
     healthcheck:
       test: ["CMD-SHELL", "kafka-topics.sh --bootstrap-server kafka:9092 --list || exit 1"]

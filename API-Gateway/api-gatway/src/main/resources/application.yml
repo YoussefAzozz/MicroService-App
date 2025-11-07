@@ -7,9 +7,31 @@ spring:
       server:
         webflux:
           routes:
-            - id: patient-service-route
+            - id: patient-direct-add-route
               uri: http://patient-service:4000
+              predicates:
+                - Path=/patients
+                - Method=POST
+              filters:
+                - StripPrefix=0
+
+            - id: patient-service-route
+              uri: http://auth-service:4005
               predicates:
                 - Path=/api/patients/**
               filters:
-                - StripPrefix=1
+                - StripPrefix=2
+
+            - id: auth-login-route
+              uri: http://auth-service:4005
+              predicates:
+                - Path=/api/login/**
+              filters:
+                - StripPrefix=2
+
+            - id: google-oauth-callback-route
+              uri: http://auth-service:4005
+              predicates:
+                - Path=/api/login/oauth2/**
+              filters:
+                - StripPrefix=2

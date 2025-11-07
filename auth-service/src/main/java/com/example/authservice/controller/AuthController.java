@@ -20,7 +20,7 @@ public class AuthController {
         this.authService = authService;
     }
 
-    @PostMapping("/login")
+    @PostMapping("/api/login")
     public ResponseEntity<LoginResponseDTO> login(
             @RequestBody LoginRequestDTO loginRequestDTO) {
 
@@ -35,7 +35,14 @@ public class AuthController {
     }
 
 
-    @GetMapping("/validate")
+    @GetMapping("/login/oauth2/code/google")
+    public String loginWithGoogleAccount() {
+
+        return "Successful Login With Google Account";
+    }
+
+
+    @GetMapping("/api/validate")
     public ResponseEntity<Void> validateToken(
             @RequestHeader("Authorization") String authHeader) {
 

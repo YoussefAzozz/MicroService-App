@@ -1,5 +1,10 @@
-### GET request to example server
-GET https://examples.http-client.intellij.net/get
-    ?generated-in=IntelliJ IDEA
+### POST request Login to Server
+POST http://localhost:4005/code-exchange
+Content-Type: application/json
+
+
+{
+  "code": "asdfqwre51469"
+}
 
 ###

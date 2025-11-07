@@ -1,5 +1,7 @@
-### GET request to example server
-GET https://examples.http-client.intellij.net/get
+### POST request to OAuth2.0 Google server
+POST https://examples.http-client.intellij.net/get
     ?generated-in=IntelliJ IDEA
+Content-Type: application/json
+
 
 ###

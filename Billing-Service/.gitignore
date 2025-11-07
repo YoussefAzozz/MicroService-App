@@ -1,6 +1,12 @@
-config
+/config
 node_modules
 dist
 .env
 .DS_Store
 mongo-init
+.env.postgres
+.env.auth-db
+.env.notification
+.env.patient.service
+.env.auth.service
+.env.kafka
