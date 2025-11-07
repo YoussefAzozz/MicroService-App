@@ -14,7 +14,7 @@ services:
     image: postgres:latest
     container_name: patient-service-db
     env_file:
-      - ../Billing-Service/postgres.env
+      - ../Billing-Service/.env.postgres
       
     volumes:
       - pg_data:/var/lib/postgresql/data
