@@ -44,18 +44,25 @@ Starts all services with one command and wires all dependencies.
 MicroService-App/
 │
 ├── API-Gateway/
+│
 ├── Auth-Service/
+│
 ├── Billing-Service/
+│
 ├── Notification-Service/
+│
 ├── Analytics-Service/
+│
 ├── Patient-Management/
 │
 ├── Docker-Compose/
 │   ├── docker-compose.yml
-│   └── environment templates
+│   └── environment templates/
 │
 ├── .gitignore
+│
 └── README.md
+
 
 
 
