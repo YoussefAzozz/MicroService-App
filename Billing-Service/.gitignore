@@ -1,4 +1,4 @@
-/config
+/config/.env
 node_modules
 dist
 .env
@@ -10,3 +10,4 @@ mongo-init
 .env.patient.service
 .env.auth.service
 .env.kafka
+.env.mongo
