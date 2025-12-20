@@ -1,0 +1,10 @@
+name: test_github_actions
+on:
+  push:
+    branches:
+    - master
+jobs:
+  example_job:
+    runs-on: ubuntu-latest
+    steps:
+    - run: echo "Hello this is the first job in Github Actions!"
