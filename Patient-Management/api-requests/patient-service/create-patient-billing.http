@@ -1,8 +1,9 @@
 ### Create a new Patient Entity
 POST http://localhost:4004/api/patients/create-patient-bill
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhem96ekB5YWhvby5jb20iLCJyb2xlIjoiUEFUSUVOVCIsImlhdCI6MTc2MjU5ODg4NSwiZXhwIjoxNzYyNjM0ODg1fQ.ZRvxd8zFYkclbIBiodvT6OMkwX-XcgVe50lsL21ynhQ
 Content-Type: application/json
 
 {
   "name": "YoussefAzozz",
-  "email": "youssefazozz@yahoo.com"
+  "email": "azozz@yahoo.com"
 }

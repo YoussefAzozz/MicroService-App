@@ -1,10 +1,12 @@
 ### Update Patient Object
-PUT http://localhost:4004/api/patients/update-patient/196fe387-9e65-4278-9ced-eda5e9a18f5f
+PUT http://localhost:4004/api/patients/update-patient/e2460dd9-887d-4ecd-b6ca-4d7da6fa8964
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhem96ekB5YWhvby5jb20iLCJyb2xlIjoiUEFUSUVOVCIsImlhdCI6MTc2MjU5ODg4NSwiZXhwIjoxNzYyNjM0ODg1fQ.ZRvxd8zFYkclbIBiodvT6OMkwX-XcgVe50lsL21ynhQ
 Content-Type: application/json
 
 {
   "name": "Azozz",
-  "email": "azozzz@gmail.com",
+  "email": "azozz@outlookout.com",
+  "password": "mancity",
   "address": "Giza Al Haram",
   "dateOfBirth": "2001-04-18"
 }

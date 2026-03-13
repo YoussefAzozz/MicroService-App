@@ -1,3 +1,5 @@
 ### DELETE Request Patients
-DELETE http://localhost:4004/api/patients/delete-patient/e8caee7b-06ac-42ac-8f64-6e806209de8b
+DELETE http://localhost:4004/api/patients/delete-patient/223e4567-e89b-12d3-a456-426614174013
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhem96enR0YW1hbUB5YWhvby5jb20iLCJyb2xlIjoiUEFUSUVOVCIsImlhdCI6MTc2MjU2NDkyNywiZXhwIjoxNzYyNjAwOTI3fQ.lNeKbrNqnQHQyIyHxHV2zzlr-M-TLJ3FcsXVv7Lp_6U
+
 ###

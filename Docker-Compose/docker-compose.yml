@@ -17,7 +17,7 @@ services:
       - ../Billing-Service/.env.postgres
       
     volumes:
-      - pg_data:/var/lib/postgresql/data
+      - ../postgres-data:/var/lib/postgresql/data
     healthcheck:
       # escape $ for in-container expansion
       test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB -h 127.0.0.1"]
@@ -45,7 +45,7 @@ services:
     env_file:
       - ../Billing-Service/.env.auth-db
     volumes:
-      - auth_pg_data:/var/lib/postgresql/data
+      - ../postgresql-auth-db:/var/lib/postgresql/data
     healthcheck:
       # escape $ for in-container expansion
       test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB -h 127.0.0.1"]
@@ -64,16 +64,16 @@ services:
           cpus: "0.25"     # reserved 25% CPU
           memory: 256M     # reserved 256 MB RAM
 
-  mongo-db:
+  mongo:
     image: mongo:latest
-    container_name: mongo-db
+    container_name: mongo
     env_file:
       - ../Billing-Service/.env.mongo
       # optional seed db name (used by init scripts if you add any)
       # MONGO_INITDB_DATABASE: billing
     volumes:
       - mongo_data:/data/db
-      - ./mongo-init:/docker-entrypoint-initdb.d
+      - ../Billing-Service/mongo-init/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
     healthcheck:
       test: ["CMD", "mongosh", "--quiet", "mongodb://localhost:27017/admin", "--eval", "db.adminCommand('ping').ok"]
       interval: 5s
@@ -97,7 +97,7 @@ services:
     env_file:
       - ../Billing-Service/config/.env
     depends_on:
-      mongo-db:
+      mongo:
         condition: service_healthy
       patient-service:
         condition: service_started
@@ -113,10 +113,10 @@ services:
           memory: 256M     # reserved 256 MB RAM
 
   patient-service:
-    image: patient-service:3.0
+    image: patient-service:1.0
     container_name: patient-service
     env_file:
-      - ../Billing-Service/.env-patient-service   
+      - ../Billing-Service/.env.patient.service   
     depends_on:
       patient-service-db:
         condition: service_healthy
@@ -136,7 +136,7 @@ services:
     image: notification-service:1.0
     container_name: notification-service
     env_file:
-      - ../Billing-Service/.env.patient.service
+      - ../Billing-Service/.env.notification
     networks: 
       - patient-network
     deploy:
@@ -156,6 +156,11 @@ services:
       
     networks: 
       - patient-network
+
+    depends_on:
+      auth-service-db:
+        condition: service_healthy
+
     deploy:
       resources:
         limits:
